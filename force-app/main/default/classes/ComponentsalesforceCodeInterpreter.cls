@@ -14,10 +14,8 @@ public class ComponentsalesforceCodeInterpreter {
         String endpoint = OAIThreadURL + '/' + threadid + '/messages';
         String requestBody = '{"role": "user", "content": "' + query + '"}';
         String msgID = sendHttpRequest(endpoint, 'POST', requestBody, 200, 'Not able to Run Assistant. Status code: ', 'sendQueryToApi','');
-        System.debug('Message ID Created ---'+msgID);
         if(String.isNotBlank(msgID)){
             runId = runAssistant(threadid, asstID);
-            System.debug('runId ID Created ---'+msgID);
         }
         return runId;
     }
@@ -41,7 +39,6 @@ public class ComponentsalesforceCodeInterpreter {
     public static String getRunStep(String runId, String threadId) {
         String endpoint = OAIThreadURL + '/' + threadId + '/runs/' + runId + '/steps?order=desc&limit=1';
         String StepMessage = sendHttpRequest(endpoint, 'GET', null, 200, 'Failed to get run step. Status code: ', 'getRunStep',threadId);
-        System.debug('StepMessage-----------'+StepMessage);
         return StepMessage;
     }
 
@@ -82,9 +79,6 @@ public class ComponentsalesforceCodeInterpreter {
     }
 
     private static String sendHttpRequest(String endpoint, String method, String body, Integer expectedStatusCode, String errorMessage, String methodName, String threadID) {
-        system.debug('HIT FOR--'+endpoint);
-        system.debug('HIT FOR--'+methodName);
-        System.debug('body----'+body);
         String retVar = '';
         Http http = new Http();
         HttpRequest request = new HttpRequest();
@@ -100,44 +94,34 @@ public class ComponentsalesforceCodeInterpreter {
         try {
             HttpResponse response = http.send(request);
             if (response.getStatusCode() == expectedStatusCode) {
-                system.debug('Endpoint  --'+endpoint+'Response-------'+response.getBody());
-                system.debug('methodName  --'+methodName);
                 if(methodName == 'createNewThread'){
                     Map<String, Object> responseMap = (Map<String, Object>) JSON.deserializeUntyped(response.getBody());
                     retVar = (String) responseMap.get('id');
-                    System.debug('Thread Created'+retVar);
                 }else if(methodName == 'sendQueryToApi'){
                     Map<String, Object> responseMap = (Map<String, Object>) JSON.deserializeUntyped(response.getBody());
-                    System.debug('responseMap Created'+responseMap);
                     retVar = (String) responseMap.get('id');
                 }else if(methodName == 'runAssistant'){
                     Map<String, Object> responseMap = (Map<String, Object>) JSON.deserializeUntyped(response.getBody());
                     retVar = (String) responseMap.get('id');
                 }else if(methodName == 'checkRun'){
                     Map<String, Object> responseMap = (Map<String, Object>) JSON.deserializeUntyped(response.getBody());
-                    System.debug('Inside checkRUn Apex----'+responseMap);
                     retVar = (String) responseMap.get('status');
                 }else if(methodName == 'getRunStep'){
                     Map<String, Object> responseMap = (Map<String, Object>) JSON.deserializeUntyped(response.getBody());
-                    System.debug('Inside getRunStep Apex----'+responseMap);
                     List<Object> dataList = (List<Object>)responseMap.get('data');
                     for (Object dataItemObj : dataList) {
                         Map<String, Object> dataItem = (Map<String, Object>)dataItemObj;
                         Map<String, Object> stepDetails = (Map<String, Object>)dataItem.get('step_details');
                         String stepType = (String)stepDetails.get('type');
-                        System.debug('Inside stepType Apex----'+stepType);
                         if (stepType == 'message_creation') {
-                            System.debug('Inside message_creation Apex----'+stepType);
                             Map<String, Object> messageCreation = (Map<String, Object>)stepDetails.get('message_creation');
                             String messageId = (String)messageCreation.get('message_id');
                             retVar = getRunStepMessage(threadID, messageId);
-                            System.debug('Inside retVar Apex----'+retVar);
                         } else if (stepType == 'tool_calls') {
                             retVar = 'Executing and Interpreting Code.';
                         }
                     }
                 }else if(methodName == 'getRes'){
-                    system.debug('response---------------'+response.getbody());
                     retVar = response.getBody();
                 }else if(methodName == 'endThreadHandle'){
                     Map<String, Object> responseMap = (Map<String, Object>) JSON.deserializeUntyped(response.getBody());
@@ -154,7 +138,6 @@ public class ComponentsalesforceCodeInterpreter {
     }
 
     public static String getRunStepMessage(String threadId, String messageID){
-        System.debug('INSIDE GET MSG STEP');
         String stepMessage = '';
         String endpoint = OAIThreadURL+'/'+threadId+'/messages/'+messageID;
         Http http = new Http();
@@ -167,18 +150,13 @@ public class ComponentsalesforceCodeInterpreter {
         request.setTimeout(120000);
         HttpResponse response = http.send(request);
         if (response.getStatusCode() == 200) {
-                System.debug('STEP MSG--'+response.getBody());
                 Map<String, Object> responseMap = (Map<String, Object>) JSON.deserializeUntyped(response.getbody());
-                System.debug('INSIDE GET MSG STEP 2 '+responseMap);
                 List<Object> contentList = (List<Object>) responseMap.get('content');
-                System.debug('INSIDE GET MSG STEP 3'+contentList);
                 for (Object contentObj : contentList) {
-                    System.debug('INSIDE GET MSG STEP 4'+contentObj);
                     Map<String, Object> contentMap = (Map<String, Object>) contentObj;
                     if (contentMap.get('type') == 'text') {
                         Map<String, Object> textMap = (Map<String, Object>) contentMap.get('text');
                         String textValue = (String) textMap.get('value');
-                        System.debug('Message Content: ' + textValue);
                         stepMessage = textValue;
 
                     }
@@ -235,18 +213,13 @@ public class ComponentsalesforceCodeInterpreter {
         request.setEndpoint(OPENAI_API_URL.replace('{file_id}', fileId));
         request.setMethod('GET');
         request.setHeader('Authorization', 'Bearer ' + API_KEY);
-        system.debug('ENDPOINT'+OPENAI_API_URL.replace('{file_id}', fileId));
         try {
             HttpResponse response = http.send(request);
             if (response.getStatusCode() == 200) {
-                system.debug('response----ININININ');
                 Blob fileContent = response.getBodyAsBlob();
                 cvID = saveFileInSalesforce(fileContent, fileId);
-                System.debug('fURLURL-----------'+cvID);
                 return cvID;
             } else {
-                System.debug('Error: ' + response.getStatus());
-                System.debug('Error: ' + response.getBody());
                 return '';
             }
         } catch (Exception e) {
@@ -264,7 +237,6 @@ public class ComponentsalesforceCodeInterpreter {
         cv.NetworkId = '0DBJ1000000XZByOAO'; 
         cv.IsMajorVersion = true;
         insert cv;
-        System.debug('File Inserted - '+cv);
         return cv.Id;
     }
 

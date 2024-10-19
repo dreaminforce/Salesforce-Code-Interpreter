@@ -35,12 +35,9 @@ export default class OpenAIAssistant extends LightningElement {
     }
 
     createThread() {
-        console.log('OUTPUT :111 ');
         createNewThread()
             .then(response => {
-                console.log('OUTPUT : yesss');
                 this.initialData = response;
-                console.log('thread created'+this.initialData);
             })
             .catch(error => {
                 this.initialData = 'Error in fetching initial data: ' + error.body.message;
@@ -52,12 +49,9 @@ export default class OpenAIAssistant extends LightningElement {
     }
 
     endChatHandler(){
-        console.log("inside end----"+this.initialData);
         if(this.initialData){
             endThreadHandle({ threadid: this.initialData})
             .then(response => {
-                    
-                    console.log('response runcheck'+response);
                     if(response === true){
                         this.conversation = [];
                         this.convArray = [];
@@ -72,20 +66,16 @@ export default class OpenAIAssistant extends LightningElement {
 
     handleButtonClick() {
         this.isFirstExecution = true;
-        console.log('OUTPUT : INSIDE HANDLE BUTTON');
         const button = this.template.querySelector('lightning-button');
         var qryMessage = this.query;
         this.query = null;
         button.disabled = true;
         if (qryMessage) {
             this.convArray.push({type: 'user', message : qryMessage, iconName: 'standard:avatar', iconAlt: 'UserIcon', isUser: true,isAssistant: false});
-            console.log('RESPONSE ARRAY - '+JSON.stringify(this.convArray));
             this.conversation = this.convArray;
-            console.log('MESSAGAGER---'+qryMessage);
             sendQueryToApi({ query: qryMessage,  threadid: this.initialData, asstID: this.assistantID})
                 .then(response => {
                     this.runID = response;
-                    console.log('RUN ID--'+this.runID);
                     this.checkCompletionStatus();
                     this.addConvWaiting();
                 })
@@ -104,12 +94,9 @@ export default class OpenAIAssistant extends LightningElement {
         setTimeout(() => {
             checkRun({ runId: this.runID, threadId: this.initialData })
                 .then(secondResponse => {
-                    console.log('STATUS------'+secondResponse);
                     if (secondResponse == 'completed') {
-                        console.log('Process completed successfully.');
                         this.getThreadMessages(this.initialData);
                     } else {
-                        console.log('Process not completed, retrying...');
                         this.getRunSteps();
                         this.checkCompletionStatus();
                     }
@@ -123,8 +110,6 @@ export default class OpenAIAssistant extends LightningElement {
     getRunSteps(){
         getRunStep({ runId: this.runID, threadId: this.initialData })
                 .then(secondResponse => {
-                    console.log('IN STEP ------'+secondResponse);
-                    
                     if(secondResponse != null && secondResponse != ''){
                          if (this.isFirstExecution) {
                             this.conversation.pop();
@@ -160,19 +145,15 @@ export default class OpenAIAssistant extends LightningElement {
     getThreadMessages(threadId) {
         getRes({ threadid: threadId, allOrOne: false})
                 .then(response => {
-                    console.log('Logs'+response);
-                    console.log('RESPONSE ARRAY - '+JSON.stringify(this.convArray));
                     this.textValue = response.textValue;
                     this.cvID = response.cvID;
                     this.conversation.pop();
                     this.convArray.push({type: 'assistant', message : this.textValue, iconName: 'standard:bot', iconAlt: 'Assistant', isUser: false,
                         isAssistant: true});
-                    console.log('RESPONSE ARRAY - '+JSON.stringify(this.convArray));
                     this.conversation = this.convArray;
                     if(this.cvID != null &&  this.cvID != ''){
                         getImageUrl({cvID : this.cvID })
                         .then(imageResponse  => {
-                            console.log('Logs 5 sec'+imageResponse);
                             this.imageUrl = imageResponse ;
                         })
                         .catch(error => {
