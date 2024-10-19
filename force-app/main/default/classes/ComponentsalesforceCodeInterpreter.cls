@@ -20,8 +20,7 @@ public class ComponentsalesforceCodeInterpreter {
         return runId;
     }
 
-    @AuraEnabled
-    public static String runAssistant(String threadid, String asstID) {
+    private static String runAssistant(String threadid, String asstID) {
         String runID = '';
         String endpoint = OAIThreadURL + '/' + threadid + '/runs';
         String requestBody = '{"assistant_id": "' + asstID + '"}';
@@ -137,7 +136,7 @@ public class ComponentsalesforceCodeInterpreter {
         }
     }
 
-    public static String getRunStepMessage(String threadId, String messageID){
+    private static String getRunStepMessage(String threadId, String messageID){
         String stepMessage = '';
         String endpoint = OAIThreadURL+'/'+threadId+'/messages/'+messageID;
         Http http = new Http();
@@ -205,7 +204,7 @@ public class ComponentsalesforceCodeInterpreter {
     }
 
 
-    public static String fetchFileContent(String fileId) {
+    private static String fetchFileContent(String fileId) {
         String cvID = '';
         String fURL = '';
         Http http = new Http();
@@ -228,7 +227,7 @@ public class ComponentsalesforceCodeInterpreter {
         return '';
     }
 
-    public static String saveFileInSalesforce(Blob fileContent, String fileName) {
+    private static String saveFileInSalesforce(Blob fileContent, String fileName) {
         ContentVersion cv = new ContentVersion();
         cv.Title = fileName;
         cv.PathOnClient = fileName +'.png';
