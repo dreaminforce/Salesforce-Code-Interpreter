@@ -66,21 +66,6 @@ The XML configuration file (`.xml`) is used to expose the LWC to different Sales
 - **getRunStep()**: Retrieves the most recent step in the assistant's processing, providing intermediate output.
 - **getImageUrl()**: Handles file responses from OpenAI, converting them into Salesforce Content Versions and generating a URL.
 
-## Installation
-
-To use or modify this project, follow these steps:
-
-1. **Clone the Repository**:
-
-   ```bash
-   git clone <repository-url>
-   ```
-
-2. **Deploy the LWC Component**: Deploy the LWC component to your Salesforce org using Salesforce CLI or your preferred development tool.
-
-3. **Update Metadata Records**: Configure the metadata, such as `Meta_Assistant__mdt`, to provide API keys and endpoints required for OpenAI integration.
-
-4. **Set Up in Salesforce Community**: Add the LWC component to your Salesforce Community by navigating to the builder and dragging the component onto the desired page.
 
 ## Configuration
 
