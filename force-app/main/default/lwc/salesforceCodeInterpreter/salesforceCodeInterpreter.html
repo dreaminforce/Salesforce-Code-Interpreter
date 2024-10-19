@@ -1,0 +1,70 @@
+<template>
+    <lightning-card>
+        <div class="slds-grid slds-wrap slds-grid--align-center">
+            <b class="slds-text-heading_small">{assitHeader}</b>
+        </div>
+    </lightning-card>
+
+    <div>
+        <lightning-card title="Chat Logs">
+            <div class="chat-container">
+                <template if:false={conversation.length}><b class="slds-align_absolute-center">Start Chatting Now!</b></template>
+                <ul class="chat-list slds-p-top_medium">
+                    <template for:each={conversation} for:item="chat">
+                        <li key={chat.id} class={chat.type}>
+                            <template if:true={chat.isAssistant}>
+                                <div>
+                                    <lightning-icon
+                                        icon-name={chat.iconName}
+                                        alternative-text={chat.iconAlt}
+                                        size="medium"
+                                        class="slds-m-right_x-small"
+                                    ></lightning-icon>
+                                </div>
+                                <div class="chat-message">
+                                    {chat.message}
+                                </div>
+                            </template>
+                            <template if:true={chat.isUser}>
+                                <div>
+                                    <lightning-icon
+                                        icon-name={chat.iconName}
+                                        alternative-text={chat.iconAlt}
+                                        size="medium"
+                                        class="slds-m-left_x-small"
+                                    ></lightning-icon>
+                                </div>
+                                <div class="chat-message">
+                                    {chat.message}
+                                </div>
+                            </template>
+                        </li>
+                    </template>
+                </ul>
+            </div>
+            <div class="slds-size--12-of-12 slds-grid slds-wrap slds-p-horizontal_small">
+                <lightning-input class="slds-col slds-size_10-of-12"
+                value={query}
+                onchange={handleInputChange}
+                placeholder={assitPlaceholder}
+                onkeypress={handleEnter}
+                ></lightning-input>
+                <lightning-button 
+                    label="Enter"
+                    onclick={handleButtonClick}
+                    class="chat-enter slds-m-bottom_none slds-col slds-size_1-of-12 slds-align_absolute-center">
+                </lightning-button>
+                <lightning-button
+                    label="End Chat"
+                    onclick={endChatHandler}
+                    class="chat-end slds-m-bottom_none slds-col slds-size_1-of-12 slds-align_absolute-center">
+                </lightning-button>
+
+                <div class="slds-p-around_medium">
+                    <img src={imageUrl} alt="Image from URL" />
+                </div>
+
+            </div>
+        </lightning-card>
+    </div>
+</template>
