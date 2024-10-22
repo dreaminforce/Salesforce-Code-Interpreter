@@ -93,20 +93,16 @@ public class ComponentsalesforceCodeInterpreter {
         try {
             HttpResponse response = http.send(request);
             if (response.getStatusCode() == expectedStatusCode) {
+                Map<String, Object> responseMap = (Map<String, Object>) JSON.deserializeUntyped(response.getBody());
                 if(methodName == 'createNewThread'){
-                    Map<String, Object> responseMap = (Map<String, Object>) JSON.deserializeUntyped(response.getBody());
                     retVar = (String) responseMap.get('id');
                 }else if(methodName == 'sendQueryToApi'){
-                    Map<String, Object> responseMap = (Map<String, Object>) JSON.deserializeUntyped(response.getBody());
                     retVar = (String) responseMap.get('id');
                 }else if(methodName == 'runAssistant'){
-                    Map<String, Object> responseMap = (Map<String, Object>) JSON.deserializeUntyped(response.getBody());
                     retVar = (String) responseMap.get('id');
                 }else if(methodName == 'checkRun'){
-                    Map<String, Object> responseMap = (Map<String, Object>) JSON.deserializeUntyped(response.getBody());
                     retVar = (String) responseMap.get('status');
                 }else if(methodName == 'getRunStep'){
-                    Map<String, Object> responseMap = (Map<String, Object>) JSON.deserializeUntyped(response.getBody());
                     List<Object> dataList = (List<Object>)responseMap.get('data');
                     for (Object dataItemObj : dataList) {
                         Map<String, Object> dataItem = (Map<String, Object>)dataItemObj;
@@ -123,7 +119,6 @@ public class ComponentsalesforceCodeInterpreter {
                 }else if(methodName == 'getRes'){
                     retVar = response.getBody();
                 }else if(methodName == 'endThreadHandle'){
-                    Map<String, Object> responseMap = (Map<String, Object>) JSON.deserializeUntyped(response.getBody());
                     retVar = responseMap.get('deleted').toString();
                 }
 
