@@ -2,9 +2,17 @@
 
 This project demonstrates the integration of OpenAI Assistant's Code Interpreter into Salesforce Communities using Lightning Web Components (LWC). It enables seamless interaction with OpenAI's Assistant API, providing enhanced user experiences within Salesforce Communities. This project showcases how Salesforce and OpenAI's language model can be combined to create a code interpretation assistant that processes uploaded files.
 
+## CSV Headers
+
+img, title, console, genre, publisher, developer, critic_score, total_sales, na_sales, jp_sales, pal_sales, other_sales, release_date, last_update
+
 ## Demo Video
 
 [Salesforce OpenAI Assistant Code Interpreter Demo.webm](https://github.com/user-attachments/assets/841bbc65-79ee-4492-8eb6-fd453ce937cb)
+
+## Demo Screenshot
+
+![image](https://github.com/user-attachments/assets/59f1dbe4-56f1-4826-bf15-5a1e83b981a8)
 
 
 ## Overview
