@@ -100,11 +100,7 @@ public class ComponentsalesforceCodeInterpreter {
             HttpResponse response = http.send(request);
             if (response.getStatusCode() == expectedStatusCode) {
                 Map<String, Object> responseMap = (Map<String, Object>) JSON.deserializeUntyped(response.getBody());
-                if(methodName == 'createNewThread'){
-                    retVar = (String) responseMap.get('id');
-                }else if(methodName == 'sendQueryToApi'){
-                    retVar = (String) responseMap.get('id');
-                }else if(methodName == 'runAssistant'){
+                if(methodName == 'createNewThread' || methodName == 'sendQueryToApi' || methodName == 'runAssistant'){
                     retVar = (String) responseMap.get('id');
                 }else if(methodName == 'checkRun'){
                     retVar = (String) responseMap.get('status');
@@ -127,7 +123,6 @@ public class ComponentsalesforceCodeInterpreter {
                 }else if(methodName == 'endThreadHandle'){
                     retVar = responseMap.get('deleted').toString();
                 }
-
                 return retVar;
             } else {
                 throw new CalloutException(errorMessage + response.getStatusCode());
@@ -227,9 +222,8 @@ public class ComponentsalesforceCodeInterpreter {
                 return '';
             }
         } catch (Exception e) {
-            System.debug('Exception: ' + e.getMessage());
+            throw new CalloutException('Error occurred while Saving the File: ' + e.getMessage());
         }
-        return '';
     }
 
     private static String saveFileInSalesforce(Blob fileContent, String fileName) {
