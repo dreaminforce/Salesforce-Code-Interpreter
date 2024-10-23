@@ -50,20 +50,26 @@ public class ComponentsalesforceCodeInterpreter {
 
     @AuraEnabled
     public static String getImageUrl(String cvID) {
-        List<ContentVersion> contentVersions = [SELECT Id, ContentDocumentId, VersionData, FileExtension FROM ContentVersion WHERE Id = :cvID LIMIT 1];
-        if (contentVersions.isEmpty()) {
-            throw new CalloutException('ContentVersion not found');
+        ContentVersion contentVersion;
+        List<ContentVersion> contentVersions = new List<ContentVersion>();
+        try {
+            contentVersions = [SELECT Id, ContentDocumentId, VersionData, FileExtension FROM ContentVersion WHERE Id = :cvID LIMIT 1];
+            if (contentVersions.isEmpty()) {
+                throw new CalloutException('ContentVersion not found');
+            }
+            contentVersion = contentVersions[0];
+            ContentDistribution cd = new ContentDistribution();
+            cd.ContentVersionId = contentVersion.Id;
+            cd.Name = 'Public Link';
+            cd.PreferencesAllowOriginalDownload = true;
+            cd.PreferencesAllowPDFDownload = true;
+            cd.PreferencesAllowViewInBrowser = true;
+            cd.PreferencesNotifyOnVisit = false;
+            cd.PreferencesLinkLatestVersion = true;
+            insert cd;
+        }catch (Exception e) {
+            throw new CalloutException('Error occurred while Getting Image URL: ' + e.getMessage());
         }
-        ContentVersion contentVersion = contentVersions[0];
-        ContentDistribution cd = new ContentDistribution();
-        cd.ContentVersionId = contentVersion.Id;
-        cd.Name = 'Public Link';
-        cd.PreferencesAllowOriginalDownload = true;
-        cd.PreferencesAllowPDFDownload = true;
-        cd.PreferencesAllowViewInBrowser = true;
-        cd.PreferencesNotifyOnVisit = false;
-        cd.PreferencesLinkLatestVersion = true;
-        insert cd;
 
         String base64Content = EncodingUtil.base64Encode(contentVersion.VersionData);
         String dataUriPrefix = getDataUriPrefix(contentVersion.FileExtension);
@@ -142,21 +148,25 @@ public class ComponentsalesforceCodeInterpreter {
         request.setHeader('Authorization', 'Bearer ' + API_KEY);
         request.setHeader('OpenAI-Beta', 'assistants=v2');
         request.setTimeout(120000);
-        HttpResponse response = http.send(request);
-        if (response.getStatusCode() == 200) {
-                Map<String, Object> responseMap = (Map<String, Object>) JSON.deserializeUntyped(response.getbody());
-                List<Object> contentList = (List<Object>) responseMap.get('content');
-                for (Object contentObj : contentList) {
-                    Map<String, Object> contentMap = (Map<String, Object>) contentObj;
-                    if (contentMap.get('type') == 'text') {
-                        Map<String, Object> textMap = (Map<String, Object>) contentMap.get('text');
-                        String textValue = (String) textMap.get('value');
-                        stepMessage = textValue;
+        try{
+            HttpResponse response = http.send(request);
+            if (response.getStatusCode() == 200) {
+                    Map<String, Object> responseMap = (Map<String, Object>) JSON.deserializeUntyped(response.getbody());
+                    List<Object> contentList = (List<Object>) responseMap.get('content');
+                    for (Object contentObj : contentList) {
+                        Map<String, Object> contentMap = (Map<String, Object>) contentObj;
+                        if (contentMap.get('type') == 'text') {
+                            Map<String, Object> textMap = (Map<String, Object>) contentMap.get('text');
+                            String textValue = (String) textMap.get('value');
+                            stepMessage = textValue;
 
+                        }
                     }
-                }
-        }else {
-                throw new CalloutException('Failed to get initial data from API. Status code: ' + response.getStatusCode());
+            }else {
+                    throw new CalloutException('Failed to get initial data from API. Status code: ' + response.getStatusCode());
+            }
+        }catch (Exception e) {
+            throw new CalloutException('Error occurred while Getting Step Messages: ' + e.getMessage());
         }
         return stepMessage;
     }
